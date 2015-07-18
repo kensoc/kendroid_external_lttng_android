@@ -11,6 +11,6 @@
 #
 LOCAL_PATH := $(call my-dir)
 
-$(info Android.mk ->> $(LOCAL_PATH))
+$(info @HPatel - Android.mk ->> $(LOCAL_PATH))
 
 include $(LOCAL_PATH)/Makefile

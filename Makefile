@@ -1,10 +1,17 @@
-#LOCAL_PATH= $(call my-dir)
+LOCAL_PATH= $(call my-dir)
 
-$(info Makefile ->> Local path is $(LOCAL_PATH))
-$(info Makefile ->> top dir is $(TOPDIR))
-$(info Makefile ->> Houst out executable is $(HOST_OUT_EXECUTABLES))
-$(info Makefile ->> Target copy out system is $(TARGET_COPY_OUT_SYSTEM))
-$(info Makefile ->> all paths can be seen at TOPDIR/build/core/envsetup.mk)
+$(info @HPatel - Makefile ->> Local path is $(LOCAL_PATH))
+$(info @HPatel - Makefile ->> product out dir is $(PRODUCT_OUT))
+$(info @HPatel - Makefile ->> Target Out dir is $(TARGET_OUT))
+$(info @HPatel - Makefile ->> Target out executables dir is $(TARGET_OUT_EXECUTABLES))
+$(info @HPatel - Makefile ->> Target out optional exuecutables dir is $(TARGET_OUT_OPTIONAL_EXECUTABLES))
+$(info @HPatel - Makefile ->> Target out shared libs dir is $(TARGET_OUT_SHARED_LIBRARIES))
+$(info @HPatel - Makefile ->> Target out etc dir is $(TARGET_OUT_ETC))
+$(info @HPatel - Makefile ->> Target out java framework dir is $(TARGET_OUT_JAVA_LIBRARIES))
+$(info @HPatel - Makefile ->> Target out apps dir is $(TARGET_OUT_APPS))
+
+#include makefiles here
+include $(LOCAL_PATH)/ConfigureMe.mk
 
 # Build all lttng modules
 all_modules: lttng-modules lttng-tools
@@ -15,23 +22,21 @@ clean:lttng-modules-clean
 lttng-modules: 
 	echo "lttng-modules started"; \
 	$(MAKE) -C $(LOCAL_PATH)/../lttng-modules $(KERNELDIR) modules && \
-	$(MAKE) -C $(LOCAL_PATH)/../lttng-modules $(KERNELDIR) modules_install && \
+	$(MAKE) -C $(LOCAL_PATH)/../lttng-modules $(KERNELDIR) modules_install  INSTALL_MOD_PATH=$(TARGET_OUT) && \
 	echo "lttng-modules finished";
 
 lttng-tools:
-	echo "lttng-modules started"; \
+	echo "lttng-tools started"; \
 	cd lttng-tools; \
-	./bootstrap
-	./configure
-	make
-	make install
-	sudo ldconfig
-	#LOCAL_CLFAGS += -DLIBXML_SCHEMAS_ENABLED
+	./bootstrap; \
+	./configure; \
+	make LOCAL_CLFAGS += -DLIBXML_SCHEMAS_ENABLED; \
+	make install; \
+	sudo ldconfig; \
+	cd -; \
+	echo "lttng-tools finished";
 	
 lttng-modules-clean:
 	echo "lttng-modules-clean started"; \
 	$(MAKE) -C $(LOCAL_PATH)/../lttng-modules $(KERNELDIR) clean && \
 	echo "lttng-modules-clean finished";
-
-	
-	
