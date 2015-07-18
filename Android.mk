@@ -11,4 +11,6 @@
 #
 LOCAL_PATH := $(call my-dir)
 
-include $(call all-makefiles-under, $(LOCAL_PATH))
+$(info Android.mk ->> $(LOCAL_PATH))
+
+include $(LOCAL_PATH)/Makefile
