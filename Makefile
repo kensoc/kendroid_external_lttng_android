@@ -21,7 +21,7 @@ clean:lttng-modules-clean
 
 lttng-modules: 
 	echo "lttng-modules started"; \
-	$(MAKE) -C $(LOCAL_PATH)/../lttng-modules $(KERNELDIR) modules && \
+	$(MAKE) -C $(LOCAL_PATH)/../lttng-modules $(KERNELDIR) default && \
 	$(MAKE) -C $(LOCAL_PATH)/../lttng-modules $(KERNELDIR) modules_install  INSTALL_MOD_PATH=$(TARGET_OUT) && \
 	echo "lttng-modules finished";
 
