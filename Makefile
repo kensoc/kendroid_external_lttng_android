@@ -1,4 +1,4 @@
-LOCAL_PATH= $(call my-dir)
+#LOCAL_PATH= $(call my-dir)
 
 $(info @HPatel - Makefile ->> Local path is $(LOCAL_PATH))
 $(info @HPatel - Makefile ->> product out dir is $(PRODUCT_OUT))
