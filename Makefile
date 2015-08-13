@@ -17,26 +17,73 @@ include $(LOCAL_PATH)/ConfigureMe.mk
 all_modules: lttng-modules lttng-tools
 
 # Clean all lttng modules
-clean:lttng-modules-clean
+clean:lttng-modules-clean lttng-tools-clean
 
 lttng-modules: 
-	echo "lttng-modules started"; \
+	echo "lttng-modules build started"; \
 	$(MAKE) -C $(LOCAL_PATH)/../lttng-modules $(KERNELDIR) default && \
 	$(MAKE) -C $(LOCAL_PATH)/../lttng-modules $(KERNELDIR) modules_install  INSTALL_MOD_PATH=$(ANDROID_ROOT)/$(TARGET_OUT) && \
-	echo "lttng-modules finished";
+	echo "lttng-modules build finished";
 
-lttng-tools:
-	echo "lttng-tools started"; \
-	cd lttng-tools; \
-	./bootstrap; \
-	./configure; \
-	make LOCAL_CLFAGS += -DLIBXML_SCHEMAS_ENABLED; \
-	make install; \
-	sudo ldconfig; \
-	cd -; \
-	echo "lttng-tools finished";
-	
 lttng-modules-clean:
 	echo "lttng-modules-clean started"; \
 	$(MAKE) -C $(LOCAL_PATH)/../lttng-modules $(KERNELDIR) clean && \
 	echo "lttng-modules-clean finished";
+
+userspace-rcu:
+	echo "userspace-rcu build started"; \
+	cd $(LOCAL_PATH)/../userspace-rcu; \
+	./bootstrap; \
+	./configure --host=$(HOST_MACH) --target=$(TARGET_MACH) --prefix=$(ANDROID_ROOT)/$(TARGET_OUT) && \
+	make && \
+	make install && \
+	ldconfig; \
+	cd -; \
+	echo "userspace-rcu build  finished"
+
+userspace-rcu-clean:
+	echo "userspace-rcu-clean started" \
+	cd $(LOCAL_PATH)/../userspace-rcu; \
+	make clean; \
+	cd -; \
+	echo "userspace-rcu-clean finished"
+
+libxml2:
+	echo "libxml2 build started"; \
+	cd $(LOCAL_PATH)/../libxml2; \
+	autoreconf -i; \
+	./configure --without-lzma --enable-shared --enable-static --host=$(HOST_MACH) --target=$(TARGET_MACH) --prefix=$(ANDROID_ROOT)/$(TARGET_OUT); \
+	make libxml2.la; \
+	cp xml2-config $(ANDROID_ROOT)/$(TARGET_OUT_EXECUTABLES); \
+	cp libxml2.la $(ANDROID_ROOT)/$(TARGET_OUT_SHARED_LIBRARIES); \
+	cp .libs/libxml2.a $(ANDROID_ROOT)/$(TARGET_OUT_SHARED_LIBRARIES); \
+	cd .libs; \
+	find -name 'libxml2.so*' | cpio -pdm $(ANDROID_ROOT)/$(TARGET_OUT_SHARED_LIBRARIES); \
+	cd -; \
+	cd -; \
+	echo "libxml2 build finished"
+
+libxml2-clean:
+	echo "libxml2-clean started"; \
+	cd $(LOCAL_PATH)/../libxml2; \
+	make clean; \
+	cd -; \
+	echo "libxml2-clean finished"
+
+lttng-tools:userspace-rcu libxml2
+	echo "lttng-tools started"; \
+	cd $(LOCAL_PATH)/../lttng-tools; \
+	./bootstrap; \
+	./configure --host=$(HOST_MACH) --target=$(TARGET_MACH) --prefix=$(ANDROID_ROOT)/$(TARGET_OUT) --program-prefix='' --with-lttng-system-rundir=$(ANDROID_ROOT)/$(TARGET_OUT)/vendor/var/run --with-xml-prefix=$(ANDROID_ROOT)/$(TARGET_OUT); \
+	make; \
+	make DESTDIR=$(ANDROID_ROOT)/$(TARGET_OUT) install; \
+	ldconfig; \
+	cd -; \
+	echo "lttng-tools finished";
+
+lttng-tools-clean:userspace-rcu-clean libxml2-clean
+	echo "lttng-tools-clean started"; \
+	cd $(LOCAL_PATH)/../lttng-tools; \
+	make clean; \
+	cd -; \
+	echo "lttng-tools-clean finished"	
