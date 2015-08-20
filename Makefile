@@ -14,10 +14,12 @@ $(info @HPatel - Makefile ->> Target out apps dir is $(TARGET_OUT_APPS))
 include $(LOCAL_PATH)/ConfigureMe.mk
 
 # Build all lttng modules
-all_modules: lttng-modules lttng-tools
+#all_modules: lttng-modules lttng-ust lttng-tools
+all_modules: lttng-modules lttng-ust
 
 # Clean all lttng modules
-clean:lttng-modules-clean lttng-tools-clean
+#clean:lttng-modules-clean lttng-ust-clean lttng-tools-clean
+clean:lttng-modules-clean lttng-ust-clean
 
 lttng-modules: 
 	echo "lttng-modules build started"; \
@@ -30,11 +32,29 @@ lttng-modules-clean:
 	$(MAKE) -C $(LOCAL_PATH)/../lttng-modules $(KERNELDIR) clean && \
 	echo "lttng-modules-clean finished";
 
+
+libxml2:
+	echo "libxml2 build started"; \
+	cd $(LOCAL_PATH)/../libxml2; \
+	autoreconf -i; \
+	./configure --without-lzma --enable-shared --enable-static $(CONFIGURE_OPTIONS); \
+	make; \
+	make install; \
+	cd -; \
+	echo "libxml2 build finished"
+
+libxml2-clean:
+	echo "libxml2-clean started"; \
+	cd $(LOCAL_PATH)/../libxml2; \
+	make clean; \
+	cd -; \
+	echo "libxml2-clean finished"
+
 userspace-rcu:
 	echo "userspace-rcu build started"; \
 	cd $(LOCAL_PATH)/../userspace-rcu; \
 	./bootstrap; \
-	./configure --host=$(HOST_MACH) --target=$(TARGET_MACH) --prefix=$(ANDROID_ROOT)/$(TARGET_OUT) && \
+	./configure $(CONFIGURE_OPTIONS) && \
 	make && \
 	make install && \
 	ldconfig; \
@@ -48,33 +68,28 @@ userspace-rcu-clean:
 	cd -; \
 	echo "userspace-rcu-clean finished"
 
-libxml2:
-	echo "libxml2 build started"; \
-	cd $(LOCAL_PATH)/../libxml2; \
-	autoreconf -i; \
-	./configure --without-lzma --enable-shared --enable-static --host=$(HOST_MACH) --target=$(TARGET_MACH) --prefix=$(ANDROID_ROOT)/$(TARGET_OUT); \
-	make libxml2.la; \
-	cp xml2-config $(ANDROID_ROOT)/$(TARGET_OUT_EXECUTABLES); \
-	cp libxml2.la $(ANDROID_ROOT)/$(TARGET_OUT_SHARED_LIBRARIES); \
-	cp .libs/libxml2.a $(ANDROID_ROOT)/$(TARGET_OUT_SHARED_LIBRARIES); \
-	cd .libs; \
-	find -name 'libxml2.so*' | cpio -pdm $(ANDROID_ROOT)/$(TARGET_OUT_SHARED_LIBRARIES); \
-	cd -; \
-	cd -; \
-	echo "libxml2 build finished"
+lttng-ust: userspace-rcu
+	echo "lttng-ust build started"; \
+	cd $(LOCAL_PATH)/../lttng-ust; \
+	./bootstrap; \
+        ./configure $(CONFIGURE_OPTIONS) --disable-static --enable-shared --program-prefix='' --with-lttng-system-rundir=$(ANDROID_ROOT)/$(TARGET_OUT)/vendor/var/run CPPFLAGS=-I$(ANDROID_ROOT)/$(TARGET_OUT)/include LDFLAGS=-L$(ANDROID_ROOT)/$(TARGET_OUT)/lib; \
+        make; \
+        make DESTDIR=$(ANDROID_ROOT)/$(TARGET_OUT) install; \
+        cd -; \
+        echo "lttng-ust build finished";
 
-libxml2-clean:
-	echo "libxml2-clean started"; \
-	cd $(LOCAL_PATH)/../libxml2; \
+lttng-ust-clean:
+	echo "lttng-ust-clean started"; \
+	cd $(LOCAL_PATH)/../lttng-ust; \
 	make clean; \
 	cd -; \
-	echo "libxml2-clean finished"
+	echo "lttng-ust-clean finished"
 
-lttng-tools:userspace-rcu libxml2
+lttng-tools:libxml2 userspace-rcu
 	echo "lttng-tools started"; \
 	cd $(LOCAL_PATH)/../lttng-tools; \
 	./bootstrap; \
-	./configure --host=$(HOST_MACH) --target=$(TARGET_MACH) --prefix=$(ANDROID_ROOT)/$(TARGET_OUT) --program-prefix='' --with-lttng-system-rundir=$(ANDROID_ROOT)/$(TARGET_OUT)/vendor/var/run --with-xml-prefix=$(ANDROID_ROOT)/$(TARGET_OUT); \
+	./configure $(CONFIGURE_OPTIONS) --program-prefix='' --with-lttng-system-rundir=$(ANDROID_ROOT)/$(TARGET_OUT)/vendor/var/run --with-xml-prefix=$(ANDROID_ROOT)/$(TARGET_OUT); \
 	make; \
 	make DESTDIR=$(ANDROID_ROOT)/$(TARGET_OUT) install; \
 	ldconfig; \
