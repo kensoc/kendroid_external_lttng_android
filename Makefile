@@ -56,7 +56,7 @@ userspace-rcu:
 	echo "userspace-rcu build started"; \
 	cd $(LOCAL_PATH)/../userspace-rcu; \
 	./bootstrap; \
-	./configure --enable-shared --disable-static $(CONFIGURE_OPTIONS); \
+	./configure --enable-shared $(CONFIGURE_OPTIONS); \
 	make && \
 	make install; \
 	ldconfig; \
