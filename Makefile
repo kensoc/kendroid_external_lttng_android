@@ -1,5 +1,6 @@
 #LOCAL_PATH= $(call my-dir)
 
+ifeq ("a","b")
 $(info @HPatel - Makefile ->> Local path is $(LOCAL_PATH))
 $(info @HPatel - Makefile ->> product out dir is $(PRODUCT_OUT))
 $(info @HPatel - Makefile ->> Target Out dir is $(TARGET_OUT))
@@ -9,17 +10,16 @@ $(info @HPatel - Makefile ->> Target out shared libs dir is $(TARGET_OUT_SHARED_
 $(info @HPatel - Makefile ->> Target out etc dir is $(TARGET_OUT_ETC))
 $(info @HPatel - Makefile ->> Target out java framework dir is $(TARGET_OUT_JAVA_LIBRARIES))
 $(info @HPatel - Makefile ->> Target out apps dir is $(TARGET_OUT_APPS))
+endif
 
 #include makefiles here
 include $(LOCAL_PATH)/ConfigureMe.mk
 
 # Build all lttng modules
-#all_modules: lttng-modules lttng-ust lttng-tools
-all_modules: lttng-modules lttng-ust
+all_modules: lttng-modules lttng-tools
 
 # Clean all lttng modules
-#clean:lttng-modules-clean lttng-ust-clean lttng-tools-clean
-clean:lttng-modules-clean lttng-ust-clean
+clean:lttng-modules-clean lttng-tools-clean
 
 #### LTTNG-MODULES
 lttng-modules: 
@@ -38,8 +38,8 @@ libxml2:
 	echo "libxml2 build started"; \
 	cd $(LOCAL_PATH)/../libxml2; \
 	autoreconf -i; \
-	./configure --without-lzma --enable-shared $(CONFIGURE_OPTIONS); \
-	make & \
+	./configure --without-lzma --enable-shared --enable-static $(CONFIGURE_OPTIONS); \
+	make && \
 	make install; \
 	cd -; \
 	echo "libxml2 build finished"
@@ -71,7 +71,8 @@ userspace-rcu-clean:
 	echo "userspace-rcu-clean finished"
 
 #### LTTNG-UST
-lttng-ust: userspace-rcu
+#lttng-ust: userspace-rcu
+lttng-ust:
 	echo "lttng-ust build started"; \
 	cd $(LOCAL_PATH)/../lttng-ust; \
 	./bootstrap; \
@@ -90,7 +91,8 @@ lttng-ust-clean:
 	echo "lttng-ust-clean finished"
 
 #### LTTNG-TOOLS
-lttng-tools:libxml2 userspace-rcu lttng-ust
+#lttng-tools:libxml2 userspace-rcu lttng-ust
+lttng-tools:libxml2 userspace-rcu
 	echo "lttng-tools started"; \
 	cd $(LOCAL_PATH)/../lttng-tools; \
 	./bootstrap; \
@@ -101,7 +103,8 @@ lttng-tools:libxml2 userspace-rcu lttng-ust
 	cd -; \
 	echo "lttng-tools finished";
 
-lttng-tools-clean:userspace-rcu-clean libxml2-clean
+#lttng-tools-clean:libxml2-clean userspace-rcu-clean lttng-ust-clean
+lttng-tools-clean:libxml2-clean userspace-rcu-clean
 	echo "lttng-tools-clean started"; \
 	cd $(LOCAL_PATH)/../lttng-tools; \
 	make clean; \
