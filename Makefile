@@ -25,7 +25,7 @@ clean:lttng-modules-clean lttng-ust-clean
 lttng-modules: 
 	echo "lttng-modules build started"; \
 	$(MAKE) -C $(LOCAL_PATH)/../lttng-modules $(KERNELDIR) default && \
-	$(MAKE) -C $(LOCAL_PATH)/../lttng-modules $(KERNELDIR) modules_install  INSTALL_MOD_PATH=$(ANDROID_ROOT)/$(TARGET_OUT) && \
+	$(MAKE) -C $(LOCAL_PATH)/../lttng-modules $(KERNELDIR) modules_install  INSTALL_MOD_PATH=$(LTTNG_OUT_INSTALL_DIR) && \
 	echo "lttng-modules build finished";
 
 lttng-modules-clean:
@@ -39,7 +39,7 @@ libxml2:
 	cd $(LOCAL_PATH)/../libxml2; \
 	autoreconf -i; \
 	./configure --without-lzma --enable-shared $(CONFIGURE_OPTIONS); \
-	make; \
+	make & \
 	make install; \
 	cd -; \
 	echo "libxml2 build finished"
@@ -56,9 +56,9 @@ userspace-rcu:
 	echo "userspace-rcu build started"; \
 	cd $(LOCAL_PATH)/../userspace-rcu; \
 	./bootstrap; \
-	./configure --enable-shared --disable-static $(CONFIGURE_OPTIONS) && \
+	./configure --enable-shared --disable-static $(CONFIGURE_OPTIONS); \
 	make && \
-	make install && \
+	make install; \
 	ldconfig; \
 	cd -; \
 	echo "userspace-rcu build  finished"
@@ -75,9 +75,10 @@ lttng-ust: userspace-rcu
 	echo "lttng-ust build started"; \
 	cd $(LOCAL_PATH)/../lttng-ust; \
 	./bootstrap; \
-        ./configure --enable-shared --disable-static $(CONFIGURE_OPTIONS) --program-prefix='' --with-lttng-system-rundir=$(ANDROID_ROOT)/$(TARGET_OUT)/vendor/var/run CPPFLAGS=-I$(ANDROID_ROOT)/$(TARGET_OUT)/include LDFLAGS=-L$(ANDROID_ROOT)/$(TARGET_OUT)/lib; \
-        make; \
-        make DESTDIR=$(ANDROID_ROOT)/$(TARGET_OUT) install; \
+        ./configure --enable-shared $(CONFIGURE_OPTIONS) --program-prefix='' --with-lttng-system-rundir=$(LTTNG_OUT_INSTALL_DIR)/vendor/var/run CPPFLAGS=-I$(LTTNG_OUT_INSTALL_DIR)/include LDFLAGS=-L$(LTTNG_OUT_INSTALL_DIR)/lttng/lib; \
+        make &&\
+        make DESTDIR=$(LTTNG_OUT_INSTALL_DIR) install; \
+	ldconfig; \
         cd -; \
         echo "lttng-ust build finished";
 
@@ -93,9 +94,9 @@ lttng-tools:libxml2 userspace-rcu lttng-ust
 	echo "lttng-tools started"; \
 	cd $(LOCAL_PATH)/../lttng-tools; \
 	./bootstrap; \
-	./configure --enable-shared --disable-static $(CONFIGURE_OPTIONS) --program-prefix='' --with-lttng-system-rundir=$(ANDROID_ROOT)/$(TARGET_OUT)/vendor/var/run --with-xml-prefix=$(ANDROID_ROOT)/$(TARGET_OUT) CPPFLAGS=-I$(ANDROID_ROOT)/$(TARGET_OUT)/include LDFLAGS=-L$(ANDROID_ROOT)/$(TARGET_OUT)/lib --with-lttng-ust-prefix=$(ANDROID_ROOT)/$(TARGET_OUT); \
+	./configure --enable-shared --disable-static $(CONFIGURE_OPTIONS) --program-prefix='' --with-lttng-system-rundir=$(LTTNG_OUT_INSTALL_DIR)/vendor/var/run --with-xml-prefix=$(LTTNG_OUT_INSTALL_DIR) CPPFLAGS=-I$(LTTNG_OUT_INSTALL_DIR)/include LDFLAGS=-L$(LTTNG_OUT_INSTALL_DIR)/lib --with-lttng-ust-prefix=$(LTTNG_OUT_INSTALL_DIR); \
 	make; \
-	make DESTDIR=$(ANDROID_ROOT)/$(TARGET_OUT) install; \
+	make DESTDIR=$(LTTNG_OUT_INSTALL_DIR) install; \
 	ldconfig; \
 	cd -; \
 	echo "lttng-tools finished";
