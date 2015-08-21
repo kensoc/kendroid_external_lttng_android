@@ -10,5 +10,8 @@ KERNELDIR := $(ANDROID_ROOT)/kernel/samsung/exynos5422
 LTTNG_KERNELDIR := $(KERNELDIR)
 $(info @HPatel - ConfigureMe.mk ->> KERNEL DIR is $(KERNELDIR))
 
+
+LTTNG_OUT_INSTALL_DIR := $(ANDROID_ROOT)/$(TARGET_OUT)/lttng
+
 HOST_ARCH :=$(shell uname -i)
-CONFIGURE_OPTIONS := --host=$(HOST_ARCH) --target=$(TARGET_ARCH) --prefix=$(ANDROID_ROOT)/$(TARGET_OUT)
+CONFIGURE_OPTIONS := --host=$(HOST_ARCH) --target=$(TARGET_ARCH) --prefix=$(LTTNG_OUT_INSTALL_DIR)
