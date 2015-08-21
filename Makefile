@@ -76,9 +76,9 @@ lttng-ust:
 	echo "lttng-ust build started"; \
 	cd $(LOCAL_PATH)/../lttng-ust; \
 	./bootstrap; \
-        ./configure --enable-shared $(CONFIGURE_OPTIONS) --program-prefix='' --with-lttng-system-rundir=$(LTTNG_OUT_INSTALL_DIR)/vendor/var/run CPPFLAGS=-I$(LTTNG_OUT_INSTALL_DIR)/include LDFLAGS=-L$(LTTNG_OUT_INSTALL_DIR)/lttng/lib; \
+        ./configure --enable-shared $(CONFIGURE_OPTIONS) --program-prefix='' --with-lttng-system-rundir=$(LTTNG_OUT_INSTALL_DIR)/vendor/var/run CPPFLAGS=-I$(LTTNG_OUT_INSTALL_DIR)/include LDFLAGS=-L$(LTTNG_OUT_INSTALL_DIR)/lib; \
         make &&\
-        make DESTDIR=$(LTTNG_OUT_INSTALL_DIR) install; \
+        make install; \
 	ldconfig; \
         cd -; \
         echo "lttng-ust build finished";
@@ -91,20 +91,18 @@ lttng-ust-clean:
 	echo "lttng-ust-clean finished"
 
 #### LTTNG-TOOLS
-#lttng-tools:libxml2 userspace-rcu lttng-ust
-lttng-tools:libxml2 userspace-rcu
+lttng-tools:libxml2 userspace-rcu lttng-ust
 	echo "lttng-tools started"; \
 	cd $(LOCAL_PATH)/../lttng-tools; \
 	./bootstrap; \
-	./configure --enable-shared --disable-static $(CONFIGURE_OPTIONS) --program-prefix='' --with-lttng-system-rundir=$(LTTNG_OUT_INSTALL_DIR)/vendor/var/run --with-xml-prefix=$(LTTNG_OUT_INSTALL_DIR) CPPFLAGS=-I$(LTTNG_OUT_INSTALL_DIR)/include LDFLAGS=-L$(LTTNG_OUT_INSTALL_DIR)/lib --with-lttng-ust-prefix=$(LTTNG_OUT_INSTALL_DIR); \
+	./configure --enable-shared $(CONFIGURE_OPTIONS) --program-prefix='' --with-lttng-system-rundir=$(LTTNG_OUT_INSTALL_DIR)/vendor/var/run --with-xml-prefix=$(LTTNG_OUT_INSTALL_DIR) CPPFLAGS=-I$(LTTNG_OUT_INSTALL_DIR)/include LDFLAGS=-L$(LTTNG_OUT_INSTALL_DIR)/lib --with-lttng-ust-prefix=$(LTTNG_OUT_INSTALL_DIR); \
 	make; \
-	make DESTDIR=$(LTTNG_OUT_INSTALL_DIR) install; \
+	make install; \
 	ldconfig; \
 	cd -; \
 	echo "lttng-tools finished";
 
-#lttng-tools-clean:libxml2-clean userspace-rcu-clean lttng-ust-clean
-lttng-tools-clean:libxml2-clean userspace-rcu-clean
+lttng-tools-clean:libxml2-clean userspace-rcu-clean lttng-ust-clean
 	echo "lttng-tools-clean started"; \
 	cd $(LOCAL_PATH)/../lttng-tools; \
 	make clean; \
