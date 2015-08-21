@@ -21,6 +21,7 @@ all_modules: lttng-modules lttng-ust
 #clean:lttng-modules-clean lttng-ust-clean lttng-tools-clean
 clean:lttng-modules-clean lttng-ust-clean
 
+#### LTTNG-MODULES
 lttng-modules: 
 	echo "lttng-modules build started"; \
 	$(MAKE) -C $(LOCAL_PATH)/../lttng-modules $(KERNELDIR) default && \
@@ -32,12 +33,12 @@ lttng-modules-clean:
 	$(MAKE) -C $(LOCAL_PATH)/../lttng-modules $(KERNELDIR) clean && \
 	echo "lttng-modules-clean finished";
 
-
+#### LIBXML2
 libxml2:
 	echo "libxml2 build started"; \
 	cd $(LOCAL_PATH)/../libxml2; \
 	autoreconf -i; \
-	./configure --without-lzma --enable-shared --enable-static $(CONFIGURE_OPTIONS); \
+	./configure --without-lzma --enable-shared $(CONFIGURE_OPTIONS); \
 	make; \
 	make install; \
 	cd -; \
@@ -50,11 +51,12 @@ libxml2-clean:
 	cd -; \
 	echo "libxml2-clean finished"
 
+#### USERSPACE-RCU
 userspace-rcu:
 	echo "userspace-rcu build started"; \
 	cd $(LOCAL_PATH)/../userspace-rcu; \
 	./bootstrap; \
-	./configure $(CONFIGURE_OPTIONS) && \
+	./configure --enable-shared --disable-static $(CONFIGURE_OPTIONS) && \
 	make && \
 	make install && \
 	ldconfig; \
@@ -68,11 +70,12 @@ userspace-rcu-clean:
 	cd -; \
 	echo "userspace-rcu-clean finished"
 
+#### LTTNG-UST
 lttng-ust: userspace-rcu
 	echo "lttng-ust build started"; \
 	cd $(LOCAL_PATH)/../lttng-ust; \
 	./bootstrap; \
-        ./configure $(CONFIGURE_OPTIONS) --disable-static --enable-shared --program-prefix='' --with-lttng-system-rundir=$(ANDROID_ROOT)/$(TARGET_OUT)/vendor/var/run CPPFLAGS=-I$(ANDROID_ROOT)/$(TARGET_OUT)/include LDFLAGS=-L$(ANDROID_ROOT)/$(TARGET_OUT)/lib; \
+        ./configure --enable-shared --disable-static $(CONFIGURE_OPTIONS) --program-prefix='' --with-lttng-system-rundir=$(ANDROID_ROOT)/$(TARGET_OUT)/vendor/var/run CPPFLAGS=-I$(ANDROID_ROOT)/$(TARGET_OUT)/include LDFLAGS=-L$(ANDROID_ROOT)/$(TARGET_OUT)/lib; \
         make; \
         make DESTDIR=$(ANDROID_ROOT)/$(TARGET_OUT) install; \
         cd -; \
@@ -85,11 +88,12 @@ lttng-ust-clean:
 	cd -; \
 	echo "lttng-ust-clean finished"
 
-lttng-tools:libxml2 userspace-rcu
+#### LTTNG-TOOLS
+lttng-tools:libxml2 userspace-rcu lttng-ust
 	echo "lttng-tools started"; \
 	cd $(LOCAL_PATH)/../lttng-tools; \
 	./bootstrap; \
-	./configure $(CONFIGURE_OPTIONS) --program-prefix='' --with-lttng-system-rundir=$(ANDROID_ROOT)/$(TARGET_OUT)/vendor/var/run --with-xml-prefix=$(ANDROID_ROOT)/$(TARGET_OUT); \
+	./configure --enable-shared --disable-static $(CONFIGURE_OPTIONS) --program-prefix='' --with-lttng-system-rundir=$(ANDROID_ROOT)/$(TARGET_OUT)/vendor/var/run --with-xml-prefix=$(ANDROID_ROOT)/$(TARGET_OUT) CPPFLAGS=-I$(ANDROID_ROOT)/$(TARGET_OUT)/include LDFLAGS=-L$(ANDROID_ROOT)/$(TARGET_OUT)/lib --with-lttng-ust-prefix=$(ANDROID_ROOT)/$(TARGET_OUT); \
 	make; \
 	make DESTDIR=$(ANDROID_ROOT)/$(TARGET_OUT) install; \
 	ldconfig; \
